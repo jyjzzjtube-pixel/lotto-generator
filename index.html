@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YJ 행운의 번호 생성기 | 로또 6/45 + 연금복권 720+</title>
+<meta name="description" content="로또 6/45 및 연금복권 720+ 자동 번호 생성기. 스마트 분석, 고정수/제외수 설정, 생성 이력 관리.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a1a;--card:#111827;--card2:#1a2235;--card3:#1e293b;
+  --accent:#6366f1;--accent2:#818cf8;--accent3:#a5b4fc;
+  --gold:#f59e0b;--gold2:#fbbf24;
+  --green:#10b981;--red:#ef4444;--blue:#3b82f6;
+  --text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+  --border:#1e293b;--border2:#334155;
+  --radius:16px;--radius-sm:10px;--radius-xs:6px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+  --shadow-lg:0 8px 40px rgba(0,0,0,.6);
+  --font:'Noto Sans KR','Outfit',sans-serif;
+  --font-num:'Outfit','Noto Sans KR',sans-serif;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  font-family:var(--font);background:var(--bg);color:var(--text);
+  min-height:100vh;overflow-x:hidden;
+  background-image:
+    radial-gradient(ellipse 600px 400px at 20% 10%,rgba(99,102,241,.08),transparent),
+    radial-gradient(ellipse 500px 500px at 80% 80%,rgba(16,185,129,.06),transparent);
+}
+a{color:var(--accent2);text-decoration:none}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* Header */
+.header{
+  text-align:center;padding:2.5rem 1rem 1.5rem;
+  background:linear-gradient(180deg,rgba(99,102,241,.1) 0%,transparent 100%);
+}
+.header h1{
+  font-size:2rem;font-weight:900;
+  background:linear-gradient(135deg,var(--accent2),var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;letter-spacing:-.02em;
+}
+.header p{color:var(--text2);margin-top:.4rem;font-size:.9rem;font-weight:300}
+.header .badge{
+  display:inline-block;margin-top:.6rem;padding:.25rem .8rem;
+  background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);
+  border-radius:20px;font-size:.75rem;color:var(--accent3);
+}
+
+/* Tabs */
+.tabs{
+  display:flex;gap:4px;max-width:600px;margin:0 auto;padding:0 1rem;
+}
+.tab{
+  flex:1;padding:.85rem;text-align:center;font-weight:600;font-size:.95rem;
+  background:var(--card);border:1px solid var(--border);cursor:pointer;
+  border-radius:var(--radius-sm) var(--radius-sm) 0 0;
+  color:var(--text3);transition:all .25s;position:relative;
+}
+.tab:hover{color:var(--text2);background:var(--card2)}
+.tab.active{
+  color:var(--text);background:var(--card2);
+  border-bottom-color:var(--card2);
+}
+.tab.active::after{
+  content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--gold));
+}
+.tab span{font-size:.75rem;display:block;color:var(--text3);font-weight:400;margin-top:2px}
+
+/* Main Container */
+.container{max-width:600px;margin:0 auto;padding:0 1rem 3rem}
+.panel{display:none}
+.panel.active{display:block}
+.section{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:0 0 var(--radius) var(--radius);
+  padding:1.5rem;margin-bottom:1rem;
+}
+.section+.section{border-radius:var(--radius);margin-top:.75rem}
+.section-title{
+  font-size:.85rem;font-weight:600;color:var(--text2);
+  margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;
+}
+.section-title .icon{font-size:1rem}
+
+/* Lotto Balls */
+.lotto-set{
+  display:flex;flex-direction:column;gap:1rem;margin-bottom:1rem;
+}
+.set-row{
+  background:var(--card2);border-radius:var(--radius-sm);padding:1rem;
+  border:1px solid var(--border);position:relative;
+  animation:setReveal .5s ease-out both;
+}
+.set-row .set-label{
+  font-size:.7rem;color:var(--text3);margin-bottom:.6rem;font-weight:500;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.set-row .copy-btn{
+  background:none;border:none;color:var(--text3);cursor:pointer;
+  font-size:.7rem;padding:2px 6px;border-radius:4px;transition:all .2s;
+}
+.set-row .copy-btn:hover{color:var(--accent2);background:rgba(99,102,241,.1)}
+.balls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ball{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-num);font-weight:700;font-size:.95rem;
+  color:#fff;position:relative;
+  animation:ballDrop .4s cubic-bezier(.34,1.56,.64,1) both;
+  box-shadow:inset 0 -3px 6px rgba(0,0,0,.3),0 2px 8px rgba(0,0,0,.3);
+  text-shadow:0 1px 2px rgba(0,0,0,.4);
+}
+.ball::after{
+  content:'';position:absolute;top:5px;left:10px;
+  width:12px;height:6px;background:rgba(255,255,255,.35);
+  border-radius:50%;transform:rotate(-20deg);
+}
+.ball.yellow{background:linear-gradient(135deg,#fbbf24,#f59e0b)}
+.ball.blue{background:linear-gradient(135deg,#60a5fa,#3b82f6)}
+.ball.red{background:linear-gradient(135deg,#f87171,#ef4444)}
+.ball.gray{background:linear-gradient(135deg,#9ca3af,#6b7280)}
+.ball.green{background:linear-gradient(135deg,#34d399,#10b981)}
+.ball-divider{
+  color:var(--text3);font-size:1.2rem;font-weight:300;margin:0 2px;
+}
+.ball.bonus{
+  border:2px dashed var(--gold);box-shadow:0 0 12px rgba(245,158,11,.3),
+  inset 0 -3px 6px rgba(0,0,0,.3);
+}
+
+@keyframes ballDrop{
+  0%{transform:translateY(-30px) scale(0);opacity:0}
+  100%{transform:translateY(0) scale(1);opacity:1}
+}
+@keyframes setReveal{
+  0%{transform:translateX(-20px);opacity:0}
+  100%{transform:translateX(0);opacity:1}
+}
+
+/* Analysis Box */
+.analysis{
+  display:grid;grid-template-columns:1fr 1fr;gap:.5rem;
+  margin-top:.75rem;
+}
+.analysis-item{
+  background:var(--card);border-radius:var(--radius-xs);padding:.6rem .75rem;
+  border:1px solid var(--border);
+}
+.analysis-item .label{font-size:.65rem;color:var(--text3);margin-bottom:2px}
+.analysis-item .value{font-size:.85rem;font-weight:600;font-family:var(--font-num)}
+
+/* Buttons */
+.btn-group{display:flex;gap:.5rem;margin:1rem 0}
+.btn{
+  flex:1;padding:.9rem;border:none;border-radius:var(--radius-sm);
+  font-family:var(--font);font-weight:700;font-size:.95rem;
+  cursor:pointer;transition:all .25s;position:relative;overflow:hidden;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;
+  box-shadow:0 4px 16px rgba(99,102,241,.4);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(99,102,241,.5)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary.generating{animation:pulse 1s infinite}
+.btn-secondary{
+  background:var(--card2);color:var(--text2);border:1px solid var(--border2);
+}
+.btn-secondary:hover{background:var(--card3);color:var(--text)}
+.btn-sm{padding:.5rem .75rem;font-size:.8rem;flex:none}
+
+@keyframes pulse{
+  0%,100%{box-shadow:0 4px 16px rgba(99,102,241,.4)}
+  50%{box-shadow:0 4px 24px rgba(99,102,241,.7)}
+}
+
+/* Number Picker Grid */
+.picker-section{margin-top:1rem}
+.picker-label{
+  font-size:.8rem;font-weight:500;color:var(--text2);margin-bottom:.5rem;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.picker-grid{
+  display:grid;grid-template-columns:repeat(9,1fr);gap:4px;
+}
+.picker-num{
+  aspect-ratio:1;border-radius:50%;border:1px solid var(--border2);
+  background:var(--card);display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-family:var(--font-num);font-weight:600;
+  cursor:pointer;transition:all .2s;color:var(--text2);
+}
+.picker-num:hover{border-color:var(--accent);color:var(--text)}
+.picker-num.selected-include{
+  background:var(--accent);border-color:var(--accent);color:#fff;
+  box-shadow:0 2px 8px rgba(99,102,241,.4);
+}
+.picker-num.selected-exclude{
+  background:var(--red);border-color:var(--red);color:#fff;
+  box-shadow:0 2px 8px rgba(239,68,68,.4);text-decoration:line-through;
+}
+.picker-mode-toggle{
+  display:flex;gap:4px;background:var(--card);border-radius:20px;
+  padding:2px;border:1px solid var(--border);
+}
+.mode-btn{
+  padding:4px 10px;border:none;border-radius:18px;font-size:.7rem;
+  font-family:var(--font);cursor:pointer;transition:all .2s;
+  background:transparent;color:var(--text3);
+}
+.mode-btn.active-include{background:var(--accent);color:#fff}
+.mode-btn.active-exclude{background:var(--red);color:#fff}
+
+/* Smart Options */
+.smart-options{
+  display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0;
+}
+.smart-opt{
+  padding:.4rem .75rem;border-radius:20px;font-size:.75rem;
+  border:1px solid var(--border2);background:var(--card);
+  color:var(--text2);cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;gap:4px;
+}
+.smart-opt:hover{border-color:var(--accent);color:var(--text)}
+.smart-opt.active{
+  border-color:var(--green);color:var(--green);
+  background:rgba(16,185,129,.1);
+}
+.smart-opt .dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--text3);transition:all .2s;
+}
+.smart-opt.active .dot{background:var(--green)}
+
+/* Pension Lottery */
+.pension-set{
+  background:var(--card2);border-radius:var(--radius-sm);
+  padding:1rem 1.25rem;border:1px solid var(--border);
+  margin-bottom:.75rem;animation:setReveal .5s ease-out both;
+}
+.pension-label{
+  font-size:.7rem;color:var(--text3);margin-bottom:.5rem;font-weight:500;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.pension-number{
+  font-family:var(--font-num);font-size:1.5rem;font-weight:700;
+  letter-spacing:.08em;display:flex;align-items:center;gap:4px;
+}
+.pension-group{
+  color:var(--gold);font-weight:800;
+}
+.pension-jo{
+  color:var(--text3);font-size:.9rem;font-weight:400;margin:0 4px;
+}
+.pension-digits{color:var(--text)}
+.pension-digit{
+  display:inline-block;animation:digitReveal .3s ease-out both;
+}
+@keyframes digitReveal{
+  0%{transform:translateY(-10px);opacity:0}
+  100%{transform:translateY(0);opacity:1}
+}
+
+/* Statistics */
+.stats-bar-chart{margin:1rem 0}
+.bar-row{
+  display:flex;align-items:center;gap:.5rem;margin-bottom:4px;
+}
+.bar-label{
+  font-size:.65rem;font-family:var(--font-num);color:var(--text3);
+  width:32px;text-align:right;flex-shrink:0;
+}
+.bar-track{
+  flex:1;height:16px;background:var(--card);border-radius:4px;
+  overflow:hidden;position:relative;
+}
+.bar-fill{
+  height:100%;border-radius:4px;transition:width .6s ease-out;
+  min-width:2px;
+}
+.bar-fill.yellow{background:linear-gradient(90deg,#fbbf24,#f59e0b)}
+.bar-fill.blue{background:linear-gradient(90deg,#60a5fa,#3b82f6)}
+.bar-fill.red{background:linear-gradient(90deg,#f87171,#ef4444)}
+.bar-fill.gray{background:linear-gradient(90deg,#9ca3af,#6b7280)}
+.bar-fill.green{background:linear-gradient(90deg,#34d399,#10b981)}
+.bar-count{
+  font-size:.6rem;font-family:var(--font-num);color:var(--text3);
+  width:24px;flex-shrink:0;
+}
+
+/* History */
+.history-list{max-height:400px;overflow-y:auto}
+.history-item{
+  padding:.75rem;border-bottom:1px solid var(--border);
+  display:flex;flex-direction:column;gap:.4rem;
+}
+.history-item:last-child{border-bottom:none}
+.history-date{font-size:.65rem;color:var(--text3)}
+.history-balls{display:flex;gap:4px;flex-wrap:wrap}
+.history-balls .ball{width:28px;height:28px;font-size:.7rem}
+.history-balls .ball::after{display:none}
+.history-clear{
+  text-align:center;padding:.75rem;
+}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);
+  background:var(--card2);border:1px solid var(--border2);
+  padding:.75rem 1.25rem;border-radius:var(--radius-sm);
+  font-size:.85rem;color:var(--text);box-shadow:var(--shadow-lg);
+  transition:transform .3s ease-out;z-index:1000;
+  backdrop-filter:blur(12px);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Probability Box */
+.prob-box{
+  background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(245,158,11,.05));
+  border:1px solid rgba(99,102,241,.2);border-radius:var(--radius-sm);
+  padding:1rem;margin:1rem 0;
+}
+.prob-title{font-size:.8rem;font-weight:600;color:var(--accent3);margin-bottom:.5rem}
+.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.prob-item{font-size:.75rem;color:var(--text2)}
+.prob-item strong{color:var(--text);font-family:var(--font-num)}
+
+/* Footer */
+.footer{
+  text-align:center;padding:2rem 1rem;color:var(--text3);font-size:.75rem;
+}
+
+/* Responsive */
+@media(max-width:400px){
+  .header h1{font-size:1.6rem}
+  .ball{width:34px;height:34px;font-size:.85rem}
+  .picker-grid{grid-template-columns:repeat(9,1fr);gap:3px}
+  .picker-num{font-size:.65rem}
+  .pension-number{font-size:1.3rem}
+}
+@media(min-width:640px){
+  .header h1{font-size:2.4rem}
+  .ball{width:44px;height:44px;font-size:1rem}
+}
+
+/* Generate count selector */
+.gen-count{
+  display:flex;align-items:center;gap:.5rem;margin:1rem 0 .5rem;
+}
+.gen-count label{font-size:.8rem;color:var(--text2)}
+.gen-count select{
+  background:var(--card2);border:1px solid var(--border2);color:var(--text);
+  padding:.35rem .6rem;border-radius:var(--radius-xs);font-family:var(--font);
+  font-size:.85rem;cursor:pointer;
+}
+
+/* Tooltip */
+.tooltip{position:relative}
+.tooltip::before{
+  content:attr(data-tip);position:absolute;bottom:120%;left:50%;
+  transform:translateX(-50%);background:var(--card3);color:var(--text);
+  padding:4px 8px;border-radius:4px;font-size:.65rem;white-space:nowrap;
+  opacity:0;pointer-events:none;transition:opacity .2s;z-index:10;
+}
+.tooltip:hover::before{opacity:1}
+
+/* Number Set Count */
+.set-count-display{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-size:.75rem;color:var(--text3);
+}
+
+/* Fade animations */
+.fade-in{animation:fadeIn .4s ease-out both}
+@keyframes fadeIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>YJ 행운의 번호 생성기</h1>
+  <p>로또 6/45 + 연금복권 720+</p>
+  <div class="badge">crypto.getRandomValues() 기반 랜덤 생성</div>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <div class="tab active" data-tab="lotto" onclick="switchTab('lotto')">
+      로또 6/45
+      <span>1~45 중 6개</span>
+    </div>
+    <div class="tab" data-tab="pension" onclick="switchTab('pension')">
+      연금복권 720+
+      <span>조 + 6자리</span>
+    </div>
+    <div class="tab" data-tab="stats" onclick="switchTab('stats')">
+      통계/이력
+      <span>분석 데이터</span>
+    </div>
+  </div>
+
+  <!-- LOTTO PANEL -->
+  <div class="panel active" id="panel-lotto">
+    <div class="section">
+      <!-- Number Picker -->
+      <div class="section-title"><span class="icon">&#9881;</span> 번호 설정</div>
+      <div class="picker-mode-toggle">
+        <button class="mode-btn active-include" id="mode-include" onclick="setPickerMode('include')">고정수</button>
+        <button class="mode-btn" id="mode-exclude" onclick="setPickerMode('exclude')">제외수</button>
+      </div>
+      <div class="picker-label" style="margin-top:.75rem">
+        <span id="picker-info">고정수를 선택하세요 (최대 5개)</span>
+        <button class="btn btn-sm btn-secondary" onclick="clearPicker()">초기화</button>
+      </div>
+      <div class="picker-grid" id="picker-grid"></div>
+
+      <!-- Smart Options -->
+      <div class="section-title" style="margin-top:1.25rem"><span class="icon">&#9733;</span> 스마트 옵션</div>
+      <div class="smart-options">
+        <div class="smart-opt" data-opt="balance-odd-even" onclick="toggleSmart(this)">
+          <span class="dot"></span> 홀짝 균형
+        </div>
+        <div class="smart-opt" data-opt="balance-high-low" onclick="toggleSmart(this)">
+          <span class="dot"></span> 고저 균형
+        </div>
+        <div class="smart-opt" data-opt="no-consecutive" onclick="toggleSmart(this)">
+          <span class="dot"></span> 연번 제외
+        </div>
+        <div class="smart-opt" data-opt="sum-range" onclick="toggleSmart(this)">
+          <span class="dot"></span> 합계 범위 (100~175)
+        </div>
+      </div>
+
+      <!-- Generate Count -->
+      <div class="gen-count">
+        <label for="lotto-count">생성 세트 수:</label>
+        <select id="lotto-count">
+          <option value="1">1세트</option>
+          <option value="3">3세트</option>
+          <option value="5" selected>5세트</option>
+          <option value="10">10세트</option>
+        </select>
+      </div>
+
+      <!-- Generate Button -->
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-generate-lotto" onclick="generateLotto()">
+          자동 생성
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="generateLottoSmart()" style="flex:.5">
+          스마트 생성
+        </button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="section" id="lotto-results" style="display:none">
+      <div class="section-title">
+        <span class="icon">&#127920;</span> 생성 결과
+        <span class="set-count-display" id="result-count"></span>
+      </div>
+      <div class="lotto-set" id="lotto-sets"></div>
+
+      <!-- Analysis -->
+      <div class="section-title"><span class="icon">&#128202;</span> 번호 분석</div>
+      <div id="lotto-analysis"></div>
+    </div>
+
+    <!-- Probability -->
+    <div class="section">
+      <div class="prob-box">
+        <div class="prob-title">당첨 확률 안내</div>
+        <div class="prob-grid">
+          <div class="prob-item">1등 (6개 일치): <strong>1/8,145,060</strong></div>
+          <div class="prob-item">2등 (5개+보너스): <strong>1/1,357,510</strong></div>
+          <div class="prob-item">3등 (5개 일치): <strong>1/35,724</strong></div>
+          <div class="prob-item">4등 (4개 일치): <strong>1/733</strong></div>
+          <div class="prob-item">5등 (3개 일치): <strong>1/45</strong></div>
+          <div class="prob-item" style="color:var(--accent3)">이 생성기는 오락 목적입니다</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PENSION PANEL -->
+  <div class="panel" id="panel-pension">
+    <div class="section">
+      <div class="section-title"><span class="icon">&#127911;</span> 연금복권 720+ 생성</div>
+      <p style="font-size:.8rem;color:var(--text3);margin-bottom:1rem">
+        각 조(1~5조)와 6자리 번호를 무작위로 생성합니다.
+      </p>
+      <div class="gen-count">
+        <label for="pension-count">생성 세트 수:</label>
+        <select id="pension-count">
+          <option value="1">1세트</option>
+          <option value="3">3세트</option>
+          <option value="5" selected>5세트</option>
+          <option value="10">10세트</option>
+        </select>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="generatePension()">연금복권 생성</button>
+      </div>
+    </div>
+    <div class="section" id="pension-results" style="display:none">
+      <div class="section-title"><span class="icon">&#127915;</span> 생성 결과</div>
+      <div id="pension-sets"></div>
+    </div>
+    <div class="section">
+      <div class="prob-box">
+        <div class="prob-title">연금복권 720+ 당첨금</div>
+        <div class="prob-grid">
+          <div class="prob-item">1등: <strong>월 700만원 x 20년</strong></div>
+          <div class="prob-item">2등: <strong>월 100만원 x 10년</strong></div>
+          <div class="prob-item">3등: <strong>1,000,000원</strong></div>
+          <div class="prob-item">4등: <strong>100,000원</strong></div>
+          <div class="prob-item">5등: <strong>50,000원</strong></div>
+          <div class="prob-item">6등: <strong>5,000원</strong></div>
+          <div class="prob-item">7등: <strong>1,000원</strong></div>
+          <div class="prob-item">보너스: <strong>월 100만원 x 10년</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS PANEL -->
+  <div class="panel" id="panel-stats">
+    <div class="section">
+      <div class="section-title"><span class="icon">&#128200;</span> 번호 분포 (최근 생성)</div>
+      <div id="stats-distribution"></div>
+      <p id="stats-empty" style="font-size:.8rem;color:var(--text3);text-align:center;padding:1rem">
+        번호를 생성하면 통계가 표시됩니다.
+      </p>
+    </div>
+    <div class="section">
+      <div class="section-title">
+        <span class="icon">&#128197;</span> 생성 이력
+        <span class="set-count-display" id="history-count"></span>
+      </div>
+      <div class="history-list" id="history-list">
+        <p id="history-empty" style="font-size:.8rem;color:var(--text3);text-align:center;padding:1rem">
+          생성 이력이 없습니다.
+        </p>
+      </div>
+      <div class="history-clear" id="history-clear-section" style="display:none">
+        <button class="btn btn-secondary btn-sm" onclick="clearHistory()">이력 전체 삭제</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">&#11088;</span> 자주 생성된 번호 TOP 10</div>
+      <div id="stats-frequent"></div>
+      <p id="freq-empty" style="font-size:.8rem;color:var(--text3);text-align:center;padding:1rem">
+        데이터가 충분하지 않습니다.
+      </p>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  &copy; 2025 YJ Partners. 본 생성기는 오락 목적이며 당첨을 보장하지 않습니다.
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+/* ===== STATE ===== */
+const state = {
+  pickerMode: 'include',
+  includeNums: new Set(),
+  excludeNums: new Set(),
+  smartOptions: new Set(),
+  history: JSON.parse(localStorage.getItem('yj_lotto_history') || '[]'),
+  allGenerated: JSON.parse(localStorage.getItem('yj_lotto_all_nums') || '[]'),
+};
+
+/* ===== CRYPTO RANDOM ===== */
+function secureRandom(max) {
+  const arr = new Uint32Array(1);
+  crypto.getRandomValues(arr);
+  return arr[0] % max;
+}
+
+function secureRandomRange(min, max) {
+  return min + secureRandom(max - min + 1);
+}
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = secureRandom(i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ===== BALL COLOR ===== */
+function getBallColor(n) {
+  if (n <= 10) return 'yellow';
+  if (n <= 20) return 'blue';
+  if (n <= 30) return 'red';
+  if (n <= 40) return 'gray';
+  return 'green';
+}
+
+/* ===== TAB SWITCHING ===== */
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${tab}`).classList.add('active');
+  if (tab === 'stats') refreshStats();
+}
+
+/* ===== PICKER ===== */
+function initPicker() {
+  const grid = document.getElementById('picker-grid');
+  grid.innerHTML = '';
+  for (let i = 1; i <= 45; i++) {
+    const div = document.createElement('div');
+    div.className = 'picker-num';
+    div.textContent = i;
+    div.dataset.num = i;
+    div.onclick = () => togglePickerNum(i, div);
+    if (state.includeNums.has(i)) div.classList.add('selected-include');
+    if (state.excludeNums.has(i)) div.classList.add('selected-exclude');
+    grid.appendChild(div);
+  }
+}
+
+function setPickerMode(mode) {
+  state.pickerMode = mode;
+  document.getElementById('mode-include').className = 'mode-btn' + (mode === 'include' ? ' active-include' : '');
+  document.getElementById('mode-exclude').className = 'mode-btn' + (mode === 'exclude' ? ' active-exclude' : '');
+  document.getElementById('picker-info').textContent =
+    mode === 'include' ? '고정수를 선택하세요 (최대 5개)' : '제외수를 선택하세요';
+}
+
+function togglePickerNum(num, el) {
+  if (state.pickerMode === 'include') {
+    if (state.excludeNums.has(num)) {
+      state.excludeNums.delete(num);
+      el.classList.remove('selected-exclude');
+    }
+    if (state.includeNums.has(num)) {
+      state.includeNums.delete(num);
+      el.classList.remove('selected-include');
+    } else {
+      if (state.includeNums.size >= 5) {
+        showToast('고정수는 최대 5개까지 선택 가능합니다.');
+        return;
+      }
+      state.includeNums.add(num);
+      el.classList.add('selected-include');
+    }
+  } else {
+    if (state.includeNums.has(num)) {
+      state.includeNums.delete(num);
+      el.classList.remove('selected-include');
+    }
+    if (state.excludeNums.has(num)) {
+      state.excludeNums.delete(num);
+      el.classList.remove('selected-exclude');
+    } else {
+      state.excludeNums.add(num);
+      el.classList.add('selected-exclude');
+    }
+  }
+}
+
+function clearPicker() {
+  state.includeNums.clear();
+  state.excludeNums.clear();
+  initPicker();
+  showToast('번호 설정이 초기화되었습니다.');
+}
+
+/* ===== SMART OPTIONS ===== */
+function toggleSmart(el) {
+  const opt = el.dataset.opt;
+  if (state.smartOptions.has(opt)) {
+    state.smartOptions.delete(opt);
+    el.classList.remove('active');
+  } else {
+    state.smartOptions.add(opt);
+    el.classList.add('active');
+  }
+}
+
+/* ===== LOTTO GENERATION ===== */
+function generateOneSet() {
+  const pool = [];
+  for (let i = 1; i <= 45; i++) {
+    if (!state.excludeNums.has(i)) pool.push(i);
+  }
+
+  const maxAttempts = 5000;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const shuffled = shuffleArray(pool);
+    const included = [...state.includeNums];
+    const remaining = shuffled.filter(n => !state.includeNums.has(n));
+    const pick = [...included, ...remaining.slice(0, 6 - included.length)];
+    if (pick.length < 6) continue;
+    const nums = pick.slice(0, 6).sort((a, b) => a - b);
+
+    // Smart filters
+    if (state.smartOptions.has('no-consecutive')) {
+      let hasConsec = false;
+      for (let i = 1; i < nums.length; i++) {
+        if (nums[i] - nums[i - 1] === 1) { hasConsec = true; break; }
+      }
+      if (hasConsec) continue;
+    }
+
+    if (state.smartOptions.has('balance-odd-even')) {
+      const odd = nums.filter(n => n % 2 === 1).length;
+      if (odd < 2 || odd > 4) continue;
+    }
+
+    if (state.smartOptions.has('balance-high-low')) {
+      const low = nums.filter(n => n <= 22).length;
+      if (low < 2 || low > 4) continue;
+    }
+
+    if (state.smartOptions.has('sum-range')) {
+      const sum = nums.reduce((a, b) => a + b, 0);
+      if (sum < 100 || sum > 175) continue;
+    }
+
+    // Generate bonus from remaining pool
+    const bonusPool = pool.filter(n => !nums.includes(n));
+    const bonus = bonusPool[secureRandom(bonusPool.length)];
+
+    return { nums, bonus };
+  }
+
+  // Fallback without smart filters
+  const shuffled = shuffleArray(pool);
+  const included = [...state.includeNums];
+  const remaining = shuffled.filter(n => !state.includeNums.has(n));
+  const pick = [...included, ...remaining.slice(0, 6 - included.length)];
+  const nums = pick.slice(0, 6).sort((a, b) => a - b);
+  const bonusPool = pool.filter(n => !nums.includes(n));
+  const bonus = bonusPool[secureRandom(bonusPool.length)];
+  showToast('스마트 조건 충족이 어려워 일반 생성으로 전환했습니다.');
+  return { nums, bonus };
+}
+
+function generateLotto() {
+  const count = parseInt(document.getElementById('lotto-count').value);
+  doGenerateLotto(count, false);
+}
+
+function generateLottoSmart() {
+  // Enable all smart options
+  document.querySelectorAll('.smart-opt').forEach(el => {
+    const opt = el.dataset.opt;
+    state.smartOptions.add(opt);
+    el.classList.add('active');
+  });
+  const count = parseInt(document.getElementById('lotto-count').value);
+  doGenerateLotto(count, true);
+}
+
+function doGenerateLotto(count, isSmart) {
+  const btn = document.getElementById('btn-generate-lotto');
+  btn.classList.add('generating');
+  btn.textContent = '생성 중...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    const sets = [];
+    for (let i = 0; i < count; i++) {
+      sets.push(generateOneSet());
+    }
+
+    renderLottoResults(sets);
+    saveLottoHistory(sets, isSmart);
+
+    btn.classList.remove('generating');
+    btn.textContent = '자동 생성';
+    btn.disabled = false;
+  }, 600);
+}
+
+function renderLottoResults(sets) {
+  const container = document.getElementById('lotto-sets');
+  container.innerHTML = '';
+  document.getElementById('lotto-results').style.display = '';
+  document.getElementById('result-count').textContent = `(${sets.length}세트)`;
+
+  sets.forEach((set, idx) => {
+    const row = document.createElement('div');
+    row.className = 'set-row';
+    row.style.animationDelay = `${idx * 0.1}s`;
+
+    let ballsHTML = set.nums.map((n, bi) =>
+      `<div class="ball ${getBallColor(n)}" style="animation-delay:${(idx * 0.1 + bi * 0.08)}s">${n}</div>`
+    ).join('');
+    ballsHTML += `<span class="ball-divider">+</span>`;
+    ballsHTML += `<div class="ball bonus ${getBallColor(set.bonus)}" style="animation-delay:${(idx * 0.1 + 0.5)}s">${set.bonus}</div>`;
+
+    const numsStr = set.nums.join(', ') + ' + ' + set.bonus;
+
+    row.innerHTML = `
+      <div class="set-label">
+        <span>${isSuffix(idx + 1)} 세트${set.smart ? ' (스마트)' : ''}</span>
+        <button class="copy-btn" onclick="copyToClipboard('${numsStr}')">복사</button>
+      </div>
+      <div class="balls">${ballsHTML}</div>
+    `;
+    container.appendChild(row);
+  });
+
+  // Analysis
+  renderAnalysis(sets);
+}
+
+function isSuffix(n) {
+  const suffixes = ['', '첫 번째', '두 번째', '세 번째', '네 번째', '다섯 번째',
+    '여섯 번째', '일곱 번째', '여덟 번째', '아홉 번째', '열 번째'];
+  return suffixes[n] || `${n}번째`;
+}
+
+function renderAnalysis(sets) {
+  const container = document.getElementById('lotto-analysis');
+  const allNums = sets.flatMap(s => s.nums);
+  const odd = allNums.filter(n => n % 2 === 1).length;
+  const even = allNums.length - odd;
+  const low = allNums.filter(n => n <= 22).length;
+  const high = allNums.length - low;
+  const sums = sets.map(s => s.nums.reduce((a, b) => a + b, 0));
+  const avgSum = Math.round(sums.reduce((a, b) => a + b, 0) / sums.length);
+
+  // Color distribution
+  const colors = { yellow: 0, blue: 0, red: 0, gray: 0, green: 0 };
+  allNums.forEach(n => colors[getBallColor(n)]++);
+  const colorNames = { yellow: '노랑(1-10)', blue: '파랑(11-20)', red: '빨강(21-30)', gray: '회색(31-40)', green: '초록(41-45)' };
+
+  container.innerHTML = `
+    <div class="analysis">
+      <div class="analysis-item">
+        <div class="label">홀수 / 짝수</div>
+        <div class="value">${odd} : ${even}</div>
+      </div>
+      <div class="analysis-item">
+        <div class="label">저번호 / 고번호</div>
+        <div class="value">${low} : ${high}</div>
+      </div>
+      <div class="analysis-item">
+        <div class="label">평균 합계</div>
+        <div class="value">${avgSum}</div>
+      </div>
+      <div class="analysis-item">
+        <div class="label">합계 범위</div>
+        <div class="value">${Math.min(...sums)} ~ ${Math.max(...sums)}</div>
+      </div>
+    </div>
+    <div style="margin-top:.75rem">
+      <div class="label" style="font-size:.7rem;color:var(--text3);margin-bottom:.4rem">색상 분포</div>
+      ${Object.entries(colors).map(([c, cnt]) => {
+        const pct = Math.round(cnt / allNums.length * 100);
+        return `<div class="bar-row">
+          <span class="bar-label" style="width:70px;font-size:.6rem">${colorNames[c]}</span>
+          <div class="bar-track"><div class="bar-fill ${c}" style="width:${pct}%"></div></div>
+          <span class="bar-count">${cnt}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+/* ===== PENSION GENERATION ===== */
+function generatePension() {
+  const count = parseInt(document.getElementById('pension-count').value);
+  const container = document.getElementById('pension-sets');
+  container.innerHTML = '';
+  document.getElementById('pension-results').style.display = '';
+
+  const sets = [];
+  for (let i = 0; i < count; i++) {
+    const group = secureRandomRange(1, 5);
+    let digits = '';
+    for (let d = 0; d < 6; d++) {
+      digits += secureRandom(10).toString();
+    }
+    sets.push({ group, digits });
+  }
+
+  sets.forEach((set, idx) => {
+    const div = document.createElement('div');
+    div.className = 'pension-set';
+    div.style.animationDelay = `${idx * 0.12}s`;
+
+    const digitSpans = set.digits.split('').map((d, di) =>
+      `<span class="pension-digit" style="animation-delay:${(idx * 0.12 + di * 0.06)}s">${d}</span>`
+    ).join('');
+
+    const fullStr = `${set.group}조 ${set.digits}`;
+
+    div.innerHTML = `
+      <div class="pension-label">
+        <span>${isSuffix(idx + 1)} 세트</span>
+        <button class="copy-btn" onclick="copyToClipboard('${fullStr}')">복사</button>
+      </div>
+      <div class="pension-number">
+        <span class="pension-group">${set.group}</span>
+        <span class="pension-jo">조</span>
+        <span class="pension-digits">${digitSpans}</span>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  // Save pension history
+  const entry = {
+    type: 'pension',
+    date: new Date().toISOString(),
+    sets: sets.map(s => `${s.group}조 ${s.digits}`)
+  };
+  state.history.unshift(entry);
+  if (state.history.length > 100) state.history = state.history.slice(0, 100);
+  localStorage.setItem('yj_lotto_history', JSON.stringify(state.history));
+}
+
+/* ===== HISTORY ===== */
+function saveLottoHistory(sets, isSmart) {
+  const entry = {
+    type: 'lotto',
+    date: new Date().toISOString(),
+    sets: sets.map(s => ({ nums: s.nums, bonus: s.bonus })),
+    smart: isSmart
+  };
+  state.history.unshift(entry);
+  if (state.history.length > 100) state.history = state.history.slice(0, 100);
+  localStorage.setItem('yj_lotto_history', JSON.stringify(state.history));
+
+  // Track all generated numbers
+  sets.forEach(s => {
+    s.nums.forEach(n => state.allGenerated.push(n));
+  });
+  if (state.allGenerated.length > 5000) state.allGenerated = state.allGenerated.slice(-3000);
+  localStorage.setItem('yj_lotto_all_nums', JSON.stringify(state.allGenerated));
+}
+
+function clearHistory() {
+  if (!confirm('모든 생성 이력을 삭제하시겠습니까?')) return;
+  state.history = [];
+  state.allGenerated = [];
+  localStorage.removeItem('yj_lotto_history');
+  localStorage.removeItem('yj_lotto_all_nums');
+  refreshStats();
+  showToast('이력이 삭제되었습니다.');
+}
+
+/* ===== STATS ===== */
+function refreshStats() {
+  renderDistribution();
+  renderHistory();
+  renderFrequent();
+}
+
+function renderDistribution() {
+  const container = document.getElementById('stats-distribution');
+  const empty = document.getElementById('stats-empty');
+
+  if (state.allGenerated.length === 0) {
+    container.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const counts = {};
+  for (let i = 1; i <= 45; i++) counts[i] = 0;
+  state.allGenerated.forEach(n => counts[n]++);
+  const maxCount = Math.max(...Object.values(counts), 1);
+
+  let html = '<div class="stats-bar-chart">';
+  for (let i = 1; i <= 45; i++) {
+    const pct = Math.round(counts[i] / maxCount * 100);
+    html += `<div class="bar-row">
+      <span class="bar-label">${i}</span>
+      <div class="bar-track"><div class="bar-fill ${getBallColor(i)}" style="width:${pct}%"></div></div>
+      <span class="bar-count">${counts[i]}</span>
+    </div>`;
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  const emptyEl = document.getElementById('history-empty');
+  const clearSection = document.getElementById('history-clear-section');
+  const countEl = document.getElementById('history-count');
+
+  if (state.history.length === 0) {
+    list.innerHTML = '';
+    list.appendChild(emptyEl);
+    emptyEl.style.display = '';
+    clearSection.style.display = 'none';
+    countEl.textContent = '';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  clearSection.style.display = '';
+  countEl.textContent = `(${state.history.length}건)`;
+
+  let html = '';
+  state.history.slice(0, 30).forEach(entry => {
+    const d = new Date(entry.date);
+    const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+
+    if (entry.type === 'lotto') {
+      entry.sets.forEach((set, si) => {
+        html += `<div class="history-item">
+          <div class="history-date">${dateStr} | 로또 ${isSuffix(si + 1)} 세트${entry.smart ? ' (스마트)' : ''}</div>
+          <div class="history-balls">
+            ${set.nums.map(n => `<div class="ball ${getBallColor(n)}">${n}</div>`).join('')}
+            <span class="ball-divider" style="font-size:.8rem">+</span>
+            <div class="ball bonus ${getBallColor(set.bonus)}">${set.bonus}</div>
+          </div>
+        </div>`;
+      });
+    } else {
+      html += `<div class="history-item">
+        <div class="history-date">${dateStr} | 연금복권</div>
+        <div style="font-family:var(--font-num);font-size:.9rem;color:var(--text2)">
+          ${entry.sets.join(' &nbsp;|&nbsp; ')}
+        </div>
+      </div>`;
+    }
+  });
+
+  list.innerHTML = html;
+}
+
+function renderFrequent() {
+  const container = document.getElementById('stats-frequent');
+  const emptyEl = document.getElementById('freq-empty');
+
+  if (state.allGenerated.length < 6) {
+    container.innerHTML = '';
+    emptyEl.style.display = '';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  const counts = {};
+  for (let i = 1; i <= 45; i++) counts[i] = 0;
+  state.allGenerated.forEach(n => counts[n]++);
+
+  const sorted = Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
+  const maxCount = sorted[0][1] || 1;
+
+  let html = '<div class="stats-bar-chart">';
+  sorted.forEach(([num, cnt]) => {
+    const pct = Math.round(cnt / maxCount * 100);
+    html += `<div class="bar-row">
+      <span class="bar-label">${num}</span>
+      <div class="bar-track"><div class="bar-fill ${getBallColor(parseInt(num))}" style="width:${pct}%"></div></div>
+      <span class="bar-count">${cnt}회</span>
+    </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+/* ===== CLIPBOARD ===== */
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('번호가 클립보드에 복사되었습니다.');
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('번호가 클립보드에 복사되었습니다.');
+  });
+}
+
+/* ===== TOAST ===== */
+let toastTimer;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+/* ===== INIT ===== */
+initPicker();
+</script>
+</body>
+</html>
